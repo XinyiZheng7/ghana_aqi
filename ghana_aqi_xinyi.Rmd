@@ -46,7 +46,7 @@ averaged_ntan_0813 <- ntankro_240813_clean %>%
 
 ```
 
-# plot
+# plot of humidity and temperature for one day
 ```{r}
 ggplot(data = averaged_ntan_0813) +
   geom_point(aes(x = Group, y = humidity), color = "blue", size = 3) + 
@@ -65,7 +65,7 @@ y-axis:
 Humidity (blue line) starts high in the morning, drops around noon, and then rises again in the evening.
 Temperature (red line) stays steady in the morning, increases around noon, and then drops in the evening.
 
-
+# Load remaining datasets
 ```{r}
 ntankro_240814 <- read_csv("./data/ntankro_mod_pm/DATA_20240817@FW22.csv", skip = 4)[, 1:3]
 
@@ -79,5 +79,43 @@ ntankro_240818 <- read_csv("./data/ntankro_mod_pm/DATA_20240817@FW22.csv", skip 
 
 ntankro_240819 <- read_csv("./data/ntankro_mod_pm/DATA_20240817@FW22.csv", skip = 4)[, 1:3]
 ```
+
+# plot of humidity and temperature for one week(2024-8-13 to 2024-8-19)
+
+```{r}
+combined_data_ntan <- bind_rows(
+  ntankro_240813,
+  ntankro_240814,
+  ntankro_240815,
+  ntankro_240816,
+  ntankro_240817,
+  ntankro_240818,
+  ntankro_240819
+)
+
+combined_data_ntan_clean <- combined_data_ntan %>%
+  mutate(across(everything(), ~ ifelse(is.na(.), mean(., na.rm = TRUE), .)))
+
+averaged_ntan <- combined_data_ntan_clean %>%
+  mutate(Group = ceiling((row_number() + 1) / 1440)) %>%
+  group_by(Group) %>%
+  summarise(across(where(is.numeric), mean, na.rm = TRUE))%>%
+  select(-4,-5,-6)
+
+
+```
+
+# plot for one week in ntankro (2024-8-13 to 2024-8-19)
+```{r}
+ggplot(averaged_ntan) +
+  geom_line(aes(x = Group, y = humidity, color = "Humidity"), size = 1) +
+  geom_line(aes(x = Group, y = temperature, color = "Temperature"), size = 1) +
+  labs(title = "Humidity and Temperature over Hours",
+       x = "Hour",
+       y = "Value") +
+  scale_color_manual(values = c("Humidity" = "blue", "Temperature" = "red")) +
+  theme_minimal()
+```
+
 
 
