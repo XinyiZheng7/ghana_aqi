@@ -84,7 +84,6 @@ ggplot(week_data, aes(x = Date, y = Hum, color = Location)) +
        y = "Humidity (%)") +
   theme_minimal()
 
-
 ```
 
 # PM2.5 plot
