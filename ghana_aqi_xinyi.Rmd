@@ -19,15 +19,101 @@ APESIKA_MOD_00397_20240820
 
 # Load necessary libraries
 ```{r}
-library(ggplot2)
-library(tidyverse)
 library(dplyr)
+library(ggplot2)
+library(readr)
+library(purrr)
 ```
 
 # Load datasets
 ```{r}
 setwd("/Users/zhengxinyi/Desktop/thesis/data/ghana_aqi_xinyi")
 
+# Set the path to the parent directory containing all the subfolders
+parent_directory <- "/Users/zhengxinyi/Desktop/thesis/data/ghana_aqi_xinyi"  
 
+# List all subfolders (representing different colleges)
+subfolders <- list.dirs(path = parent_directory, full.names = TRUE, recursive = FALSE)
+
+subfolders <- subfolders[!grepl("ghana_aqi_xinyi", subfolders)]
+
+# Function to read and combine data from all CSV files in a given folder
+read_and_combine_data <- function(folder) {
+  # List all CSV files in the folder
+  csv_files <- list.files(path = folder, pattern = "*.csv", full.names = TRUE)
+  
+  # Read all CSV files and combine them into one data frame
+  data <- csv_files %>%
+    lapply(read_csv) %>%
+    bind_rows() %>%
+    mutate(Location = basename(folder))  # Add a Location column based on folder name
+  
+  return(data)
+}
+
+# Read and combine data from all subfolders
+all_data <- subfolders %>%
+  map(read_and_combine_data) %>%  # Apply function to each folder
+  bind_rows()                     # Combine all data frames
+
+# Ensure date column is in Date format (assuming 'date' column exists)
+all_data$date <- as.Date(all_data$date, format = "%Y-%m-%d")
+
+# Filter data for the specific week (e.g., August 13 to August 19, 2024)
+week_data <- all_data %>%
+  filter(date >= as.Date("2024-08-13") & date <= as.Date("2024-08-19"))
+```
+
+
+# Scatter plot(humidity and temperature)
+```{r}
+# Assuming column names are "Temp" for temperature, "Hum" for humidity, and "Date" for time
+ggplot(week_data, aes(x = Date, y = Temp, color = Location)) +
+  geom_point() +
+  geom_line() +
+  labs(title = "Temperature Over Time",
+       x = "Date",
+       y = "Temperature (°C)") +
+  theme_minimal()
+
+ggplot(week_data, aes(x = Date, y = Hum, color = Location)) +
+  geom_point() +
+  geom_line() +
+  labs(title = "Humidity Over Time",
+       x = "Date",
+       y = "Humidity (%)") +
+  theme_minimal()
+
+
+```
+
+# PM2.5 plot
+```{r}
+set.seed(77)
+data <- data.frame(
+  Date = seq.Date(from = as.Date("2023-10-01"), by = "day", length.out = 365),
+  PM2.5 = cumsum(runif(365, min = -5, max = 5)) + 50  # Generate some sample PM2.5 data
+)
+
+# Define AQI risk category boundaries
+categories <- data.frame(
+  ymin = c(0, 12, 35, 55, 150, 250),
+  ymax = c(12, 35, 55, 150, 250, 500),
+  category = c("Good", "Moderate", "Unhealthy for Sensitive Groups", "Unhealthy", "Very Unhealthy", "Hazardous"),
+  fill = c("green", "yellow", "orange", "red", "purple", "brown")
+)
+
+# Create the plot
+ggplot(data, aes(x = Date, y = `PM2.5`)) +
+  # Add background rectangles for AQI categories
+  geom_rect(data = categories, aes(xmin = -Inf, xmax = Inf, ymin = ymin, ymax = ymax, fill = category), alpha = 0.2) +
+  geom_line(color = "black", size = 1) +
+  scale_fill_manual(values = categories$fill, name = "US-EPA AQI Risk Categories") +
+  labs(title = "PM2.5 Levels Over Time",
+       x = "Date",
+       y = expression(PM[2.5] ~ (mu * g/m^3))) +
+  theme_minimal() +
+  theme(legend.position = "right") +
+  scale_y_continuous(limits = c(0, 500), breaks = seq(0, 500, by = 50))
 ```
 
