@@ -1,0 +1,33 @@
+---
+title: "scatterplot_20240813-20240819"
+author: "Xinyi Zheng"
+date: "2024-09-28"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+I choose data from 20240813 to 20240819,
+choose 5 representative college:
+
+KINTAMPO_CENTRE_COLLEGE_MOD_PM_20240820
+NTANKRO_MOD_PM_00895_20240820
+WEILA_MOD_PM_01051_20240820
+APESIKA_MOD_00397_20240820
+
+# Load necessary libraries
+```{r}
+library(ggplot2)
+library(tidyverse)
+library(dplyr)
+```
+
+# Load datasets
+```{r}
+setwd("/Users/zhengxinyi/Desktop/thesis/data/ghana_aqi_xinyi")
+
+
+```
+
