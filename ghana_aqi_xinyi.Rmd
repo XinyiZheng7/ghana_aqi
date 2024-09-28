@@ -10,7 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 I choose data from 20240813 to 20240819,
-choose 5 representative college:
+choose 4 representative college:
 
 KINTAMPO_CENTRE_COLLEGE_MOD_PM_20240820
 NTANKRO_MOD_PM_00895_20240820
@@ -58,6 +58,15 @@ ggplot(data = averaged_ntan_0813) +
        y = "Value") +
   theme_minimal()
 ```
+
+Interpretation:
+x-axis:
+The time progresses from 0 minutes (start of the day) to 1440 minutes (end of the day), covering a full 24-hour period.
+
+y-axis:
+Humidity (blue line) starts high in the morning, drops around noon, and then rises again in the evening.
+Temperature (red line) stays steady in the morning, increases around noon, and then drops in the evening.
+
 
 ```{r}
 ntankro_240814 <- read_csv("./data/ntankro_mod_pm/DATA_20240817@FW22.csv", skip = 4)[, 1:3]
