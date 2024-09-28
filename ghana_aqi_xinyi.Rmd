@@ -25,49 +25,17 @@ library(readr)
 library(purrr)
 ```
 
-# Load datasets
+# Load and clean datasets
 ```{r}
-setwd("/Users/zhengxinyi/Desktop/thesis/data/ghana_aqi_xinyi")
+ntankro_240813 <- read.csv("/ntankro_mod_pm/DATA_20240813@FW22", skip = 4, header = TRUE)[, 1:3]
 
-# Set the path to the parent directory containing all the subfolders
-parent_directory <- "/Users/zhengxinyi/Desktop/thesis/data/ghana_aqi_xinyi"  
+ntankro_240814 <- read.csv("/ntankro_mod_pm/DATA_20240813@FW22", skip = 4, header = TRUE)[, 1:3]
 
-# List all subfolders (representing different colleges)
-subfolders <- list.dirs(path = parent_directory, full.names = TRUE, recursive = FALSE)
-
-subfolders <- subfolders[!grepl("ghana_aqi_xinyi", subfolders)]
-
-# Function to read and combine data from all CSV files in a given folder
-read_and_combine_data <- function(folder) {
-  # List all CSV files in the folder
-  csv_files <- list.files(path = folder, pattern = "*.csv", full.names = TRUE)
-  
-  # Read all CSV files and combine them into one data frame
-  data <- csv_files %>%
-    lapply(read_csv) %>%
-    bind_rows() %>%
-    mutate(Location = basename(folder))  # Add a Location column based on folder name
-  
-  return(data)
-}
-
-# Read and combine data from all subfolders
-all_data <- subfolders %>%
-  map(read_and_combine_data) %>%  # Apply function to each folder
-  bind_rows()                     # Combine all data frames
-
-# Ensure date column is in Date format (assuming 'date' column exists)
-all_data$date <- as.Date(all_data$date, format = "%Y-%m-%d")
-
-# Filter data for the specific week (e.g., August 13 to August 19, 2024)
-week_data <- all_data %>%
-  filter(date >= as.Date("2024-08-13") & date <= as.Date("2024-08-19"))
 ```
 
-
-# Scatter plot(humidity and temperature)
+# Scatter plot: humidity
 ```{r}
-# Assuming column names are "Temp" for temperature, "Hum" for humidity, and "Date" for time
+
 ggplot(week_data, aes(x = Date, y = Temp, color = Location)) +
   geom_point() +
   geom_line() +
@@ -76,6 +44,10 @@ ggplot(week_data, aes(x = Date, y = Temp, color = Location)) +
        y = "Temperature (°C)") +
   theme_minimal()
 
+```
+
+# Scatter plot: temperature
+```{r}
 ggplot(week_data, aes(x = Date, y = Hum, color = Location)) +
   geom_point() +
   geom_line() +
