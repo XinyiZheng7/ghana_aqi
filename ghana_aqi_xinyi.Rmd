@@ -22,18 +22,44 @@ APESIKA_MOD_00397_20240820
 library(dplyr)
 library(ggplot2)
 library(readr)
-library(purrr)
+library(tidyr)
+library(tidyverse)
 ```
 
 # Load and clean datasets
-```{r}
-ntankro_240813 <- read_csv("./data/ntankro_mod_pm/DATA_20240817@FW22.csv", skip = 4)[, 1:3]
 
-averaged_ntan_0813 <- ntankro_240813 %>%
-  mutate(Group = ceiling(row_number() / 12)) %>%
+notice: group1 means 0:00am, group1440 means 12:59pm in one day
+
+```{r}
+ntankro_240813 <- read_csv(
+  "./data/ntankro_mod_pm/DATA_20240817@FW22.csv", 
+  skip = 4, 
+  col_names = c("Group", "humidity", "temperature")
+)[, 1:3]
+
+
+ntankro_240813_clean <- ntankro_240813 %>%
+  mutate(across(everything(), ~ ifelse(is.na(.), mean(., na.rm = TRUE), .)))
+
+averaged_ntan_0813 <- ntankro_240813_clean %>%
+  mutate(Group = ceiling((row_number() + 1) / 12)) %>%
   group_by(Group) %>%
   summarise(across(where(is.numeric), mean, na.rm = TRUE))
 
+```
+
+# plot
+```{r}
+ggplot(data = averaged_ntan_0813) +
+  geom_point(aes(x = Group, y = humidity), color = "blue", size = 3) + 
+  geom_point(aes(x = Group, y = temperature), color = "red", size = 3) +
+  labs(title = "Scatterplot of Humidity and Temperature over Time",
+       x = "Time",
+       y = "Value") +
+  theme_minimal()
+```
+
+```{r}
 ntankro_240814 <- read_csv("./data/ntankro_mod_pm/DATA_20240817@FW22.csv", skip = 4)[, 1:3]
 
 ntankro_240815 <- read_csv("./data/ntankro_mod_pm/DATA_20240817@FW22.csv", skip = 4)[, 1:3]
