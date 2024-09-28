@@ -28,8 +28,6 @@ library(tidyverse)
 
 # Load and clean datasets
 
-notice: group1 means 0:00am, group1440 means 12:59pm in one day
-
 ```{r}
 ntankro_240813 <- read_csv(
   "./data/ntankro_mod_pm/DATA_20240817@FW22.csv", 
@@ -82,58 +80,4 @@ ntankro_240818 <- read_csv("./data/ntankro_mod_pm/DATA_20240817@FW22.csv", skip 
 ntankro_240819 <- read_csv("./data/ntankro_mod_pm/DATA_20240817@FW22.csv", skip = 4)[, 1:3]
 ```
 
-# Scatter plot: humidity
-```{r}
-
-ggplot(week_data, aes(x = Date, y = Temp, color = Location)) +
-  geom_point() +
-  geom_line() +
-  labs(title = "Temperature Over Time",
-       x = "Date",
-       y = "Temperature (°C)") +
-  theme_minimal()
-
-```
-
-# Scatter plot: temperature
-```{r}
-ggplot(week_data, aes(x = Date, y = Hum, color = Location)) +
-  geom_point() +
-  geom_line() +
-  labs(title = "Humidity Over Time",
-       x = "Date",
-       y = "Humidity (%)") +
-  theme_minimal()
-
-```
-
-# PM2.5 plot
-```{r}
-set.seed(77)
-data <- data.frame(
-  Date = seq.Date(from = as.Date("2023-10-01"), by = "day", length.out = 365),
-  PM2.5 = cumsum(runif(365, min = -5, max = 5)) + 50  # Generate some sample PM2.5 data
-)
-
-# Define AQI risk category boundaries
-categories <- data.frame(
-  ymin = c(0, 12, 35, 55, 150, 250),
-  ymax = c(12, 35, 55, 150, 250, 500),
-  category = c("Good", "Moderate", "Unhealthy for Sensitive Groups", "Unhealthy", "Very Unhealthy", "Hazardous"),
-  fill = c("green", "yellow", "orange", "red", "purple", "brown")
-)
-
-# Create the plot
-ggplot(data, aes(x = Date, y = `PM2.5`)) +
-  # Add background rectangles for AQI categories
-  geom_rect(data = categories, aes(xmin = -Inf, xmax = Inf, ymin = ymin, ymax = ymax, fill = category), alpha = 0.2) +
-  geom_line(color = "black", size = 1) +
-  scale_fill_manual(values = categories$fill, name = "US-EPA AQI Risk Categories") +
-  labs(title = "PM2.5 Levels Over Time",
-       x = "Date",
-       y = expression(PM[2.5] ~ (mu * g/m^3))) +
-  theme_minimal() +
-  theme(legend.position = "right") +
-  scale_y_continuous(limits = c(0, 500), breaks = seq(0, 500, by = 50))
-```
 
